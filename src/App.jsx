@@ -12,6 +12,7 @@ import Probability from './pages/Probability';
 import Regression from './pages/Regression';
 import Explorer from './pages/Explorer';
 import GameCompare from './pages/GameCompare';
+import OutlierDetective from './pages/OutlierDetective';
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -50,6 +51,7 @@ function App() {
               <Route path="/regression" element={<AnimatedPage><Regression /></AnimatedPage>} />
               <Route path="/explorer" element={<AnimatedPage><Explorer /></AnimatedPage>} />
               <Route path="/compare" element={<AnimatedPage><GameCompare /></AnimatedPage>} />
+              <Route path="/outliers" element={<AnimatedPage><OutlierDetective /></AnimatedPage>} />
             </Routes>
           </AnimatePresence>
         </div>

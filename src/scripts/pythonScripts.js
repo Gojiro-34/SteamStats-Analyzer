@@ -411,3 +411,56 @@ result = {
 
 json.dumps(result)
 `;
+
+export const outlierScript = `
+import pandas as pd
+import numpy as np
+import json
+
+df = pd.read_json(clean_data_json)
+
+col_key = str(outlier_column).strip()
+col_map = {
+    'price_usd': 'Price ($)',
+    'recommendations': 'Reviews',
+    'avg_playtime_forever': 'Avg Playtime (mins)'
+}
+
+col_label = col_map.get(col_key, col_key)
+series = df[col_key].dropna()
+
+q1 = float(np.percentile(series, 25))
+q3 = float(np.percentile(series, 75))
+iqr = q3 - q1
+lower = q1 - 1.5 * iqr
+upper = q3 + 1.5 * iqr
+
+outlier_mask = (df[col_key] < lower) | (df[col_key] > upper)
+outlier_df = df[outlier_mask].copy()
+outlier_df['outlier_value'] = outlier_df[col_key]
+outlier_df['direction'] = outlier_df[col_key].apply(lambda v: 'high' if v > upper else 'low')
+outlier_df['deviation'] = outlier_df[col_key].apply(
+    lambda v: round(abs(v - upper) / iqr, 2) if v > upper else round(abs(lower - v) / iqr, 2)
+)
+
+# Sort by deviation descending
+outlier_df = outlier_df.sort_values('deviation', ascending=False)
+
+outliers = outlier_df[['name', 'price_usd', 'primary_category', 'recommendations', 'rec_pct', 'avg_playtime_forever', 'outlier_value', 'direction', 'deviation']].head(100).to_dict('records')
+
+result = {
+    'column': col_key,
+    'column_label': col_label,
+    'q1': round(q1, 2),
+    'q3': round(q3, 2),
+    'iqr': round(iqr, 2),
+    'lower_fence': round(lower, 2),
+    'upper_fence': round(upper, 2),
+    'total_games': len(df),
+    'outlier_count': int(outlier_mask.sum()),
+    'outlier_pct': round(float(outlier_mask.sum()) / len(df) * 100, 1),
+    'outliers': outliers
+}
+
+json.dumps(result)
+`;

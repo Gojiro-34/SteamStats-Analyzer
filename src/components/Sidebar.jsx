@@ -45,6 +45,10 @@ export default function Sidebar() {
           <span className="nav-icon">⚔️</span>
           Game Compare
         </NavLink>
+        <NavLink to="/outliers">
+          <span className="nav-icon">🔎</span>
+          Outlier Detective
+        </NavLink>
       </nav>
 
       <div className="sidebar-footer">
